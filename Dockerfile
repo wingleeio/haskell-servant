@@ -34,6 +34,4 @@ RUN chmod +x /app/haskell-servant-exe
 
 ENV PORT=8080
 
-EXPOSE 8080
-
 CMD ["/app/haskell-servant-exe"]
