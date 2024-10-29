@@ -4,6 +4,7 @@
 module Lib.Templates
   ( counter,
     count,
+    scalar
   )
 where
 
@@ -53,6 +54,15 @@ counter n = do
           ! Hx.swap "outerHTML"
           ! A.class_ "inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline"
           $ "+"
+      
+scalar :: AppState.AppM H.Html
+scalar = do
+  metaHtml <- meta
+  pure $ H.docTypeHtml $ do
+    metaHtml
+    H.body $ do
+      H.script ! A.id "api-reference" ! H.customAttribute "data-url" "/swagger.json" $ ""
+      H.script ! A.src "https://cdn.jsdelivr.net/npm/@scalar/api-reference" $ ""
 
 count :: Integer -> H.Html
 count n = H.span ! A.id "count" $ H.toHtml (show n)

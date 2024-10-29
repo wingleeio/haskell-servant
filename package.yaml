@@ -23,16 +23,20 @@ dependencies:
   - aeson
   - servant-server
   - servant-websockets
+  - servant-openapi3
+  - openapi3
   - wai
   - warp
   - servant-blaze
   - blaze-html
+  - blaze-markup
   - text
   - cookie
   - bytestring
   - transformers
   - websockets
   - fsnotify
+  - lens
 
 ghc-options:
   - -Wall

@@ -39,10 +39,14 @@ library
       aeson
     , base >=4.17 && <5
     , blaze-html
+    , blaze-markup
     , bytestring
     , cookie
     , fsnotify
+    , lens
+    , openapi3
     , servant-blaze
+    , servant-openapi3
     , servant-server
     , servant-websockets
     , text
@@ -65,11 +69,15 @@ executable haskell-servant-exe
       aeson
     , base
     , blaze-html
+    , blaze-markup
     , bytestring
     , cookie
     , fsnotify
     , haskell-servant
+    , lens
+    , openapi3
     , servant-blaze
+    , servant-openapi3
     , servant-server
     , servant-websockets
     , text
@@ -93,6 +101,7 @@ test-suite haskell-servant-test
       aeson
     , base
     , blaze-html
+    , blaze-markup
     , bytestring
     , cookie
     , fsnotify
@@ -100,7 +109,10 @@ test-suite haskell-servant-test
     , hspec
     , hspec-wai
     , hspec-wai-json
+    , lens
+    , openapi3
     , servant-blaze
+    , servant-openapi3
     , servant-server
     , servant-websockets
     , text
