@@ -13,11 +13,9 @@ author:         Author name here
 maintainer:     example@example.com
 copyright:      2024 Author name here
 license:        BSD-3-Clause
-license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
-    CHANGELOG.md
 
 source-repository head
   type: git
@@ -25,10 +23,12 @@ source-repository head
 
 library
   exposed-modules:
+      Development
       Lib
       Lib.Attributes
-  other-modules:
+      Lib.State
       Lib.Templates
+  other-modules:
       Paths_haskell_servant
   autogen-modules:
       Paths_haskell_servant
@@ -37,15 +37,19 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson
-    , base >=4.7 && <5
+    , base >=4.17 && <5
     , blaze-html
     , bytestring
     , cookie
+    , fsnotify
     , servant-blaze
     , servant-server
+    , servant-websockets
     , text
+    , transformers
     , wai
     , warp
+    , websockets
   default-language: Haskell2010
 
 executable haskell-servant-exe
@@ -63,12 +67,16 @@ executable haskell-servant-exe
     , blaze-html
     , bytestring
     , cookie
+    , fsnotify
     , haskell-servant
     , servant-blaze
     , servant-server
+    , servant-websockets
     , text
+    , transformers
     , wai
     , warp
+    , websockets
   default-language: Haskell2010
 
 test-suite haskell-servant-test
@@ -87,13 +95,17 @@ test-suite haskell-servant-test
     , blaze-html
     , bytestring
     , cookie
+    , fsnotify
     , haskell-servant
     , hspec
     , hspec-wai
     , hspec-wai-json
     , servant-blaze
     , servant-server
+    , servant-websockets
     , text
+    , transformers
     , wai
     , warp
+    , websockets
   default-language: Haskell2010

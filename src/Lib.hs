@@ -5,6 +5,7 @@
 module Lib
   ( startApp,
     app,
+    startDevelopmentServer
   )
 where
 
@@ -12,34 +13,41 @@ import qualified Data.ByteString.Char8 as BS
 import Data.Text (Text, pack, unpack)
 import qualified Data.Text.Encoding as TE
 import Data.Text.Read (decimal)
-import Lib.Templates as Templates
+import qualified Lib.Templates as Templates
+import qualified Lib.State as AppState
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
 import Servant.HTML.Blaze
 import Text.Blaze.Html5 as H
 import Web.Cookie
+import System.Environment (lookupEnv)
+import Development
 
 type API =
   Header "Cookie" Text :> Get '[HTML] Html
     :<|> "increment" :> Header "Cookie" Text :> Post '[HTML] (Headers '[Header "Set-Cookie" Text] Html)
     :<|> "decrement" :> Header "Cookie" Text :> Post '[HTML] (Headers '[Header "Set-Cookie" Text] Html)
+    :<|> Raw
 
 startApp :: IO ()
-startApp = run 8080 app
+startApp = do
+  env <- lookupEnv "ENV"
+  let state = AppState.State { AppState.isDevelopment = env == Just "development" }
+  run 8080 (app state)
 
-app :: Application
-app = serve api server
+app :: AppState.State -> Application
+app state = serve api (hoistServer api (AppState.nt state) server)
 
 api :: Proxy API
 api = Proxy
 
-server :: Server API
-server = homeApi :<|> incrementApi :<|> decrementApi
+server :: ServerT API AppState.AppM
+server = homeApi :<|> incrementApi :<|> decrementApi :<|> serveDirectoryWebApp "public"
   where
-    homeApi = Handler . return . home
-    incrementApi = Handler . return . increment
-    decrementApi = Handler . return . decrement
+    homeApi = home
+    incrementApi = increment
+    decrementApi = decrement
 
 parseCount :: Maybe BS.ByteString -> Integer
 parseCount Nothing = 0
@@ -51,25 +59,25 @@ parseCount (Just countStr) =
 makeCookie :: (Show a) => Text -> a -> Text
 makeCookie name value = pack $ unpack name ++ "=" ++ show value ++ "; Path=/"
 
-home :: Maybe Text -> Html
+home :: Maybe Text -> AppState.AppM Html
 home Nothing = Templates.counter 0
-home (Just x) =
+home (Just x) = do
   let cookies = parseCookies (TE.encodeUtf8 x)
-      n = parseCount (lookup "haskell.count" cookies)
-   in Templates.counter n
+  let n = parseCount (lookup "haskell.count" cookies)
+  Templates.counter n
 
-increment :: Maybe Text -> Headers '[Header "Set-Cookie" Text] Html
-increment Nothing = addHeader "haskell.count=1; Path=/" (Templates.count 1)
+increment :: Maybe Text -> AppState.AppM(Headers '[Header "Set-Cookie" Text] Html)
+increment Nothing = pure $ addHeader "haskell.count=1; Path=/" (Templates.count 1)
 increment (Just x) = do
   let cookies = parseCookies (TE.encodeUtf8 x)
-      n = parseCount (lookup "haskell.count" cookies)
-      newCount = n + 1
-  addHeader (makeCookie "haskell.count" newCount) (Templates.count newCount)
+  let n = parseCount (lookup "haskell.count" cookies)
+  let newCount = n + 1
+  pure $ addHeader (makeCookie "haskell.count" newCount) (Templates.count newCount)
 
-decrement :: Maybe Text -> Headers '[Header "Set-Cookie" Text] Html
-decrement Nothing = addHeader "haskell.count=-1; Path=/" (Templates.count (-1))
+decrement :: Maybe Text -> AppState.AppM(Headers '[Header "Set-Cookie" Text] Html)
+decrement Nothing = pure $ addHeader "haskell.count=-1; Path=/" (Templates.count (-1))
 decrement (Just x) = do
   let cookies = parseCookies (TE.encodeUtf8 x)
-      n = parseCount (lookup "haskell.count" cookies)
-      newCount = n - 1
-  addHeader (makeCookie "haskell.count" newCount) (Templates.count newCount)
+  let n = parseCount (lookup "haskell.count" cookies)
+  let newCount = n - 1
+  pure $ addHeader (makeCookie "haskell.count" newCount) (Templates.count newCount)
