@@ -12,7 +12,7 @@ where
 import qualified Data.ByteString.Char8 as BS
 import Data.Text (Text, pack, unpack)
 import qualified Data.Text.Encoding as TE
-import Data.Text.Read (decimal)
+import Data.Text.Read (decimal, signed)
 import qualified Lib.Templates as Templates
 import qualified Lib.State as AppState
 import Network.Wai
@@ -52,7 +52,7 @@ server = homeApi :<|> incrementApi :<|> decrementApi :<|> serveDirectoryWebApp "
 parseCount :: Maybe BS.ByteString -> Integer
 parseCount Nothing = 0
 parseCount (Just countStr) =
-  case decimal (TE.decodeUtf8 countStr) of
+  case signed decimal (TE.decodeUtf8 countStr) of
     Right (n, _) -> n
     Left _ -> 0
 
