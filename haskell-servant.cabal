@@ -28,6 +28,7 @@ library
       Lib.Attributes
       Lib.State
       Lib.Templates
+      Lib.Utils
   other-modules:
       Paths_haskell_servant
   autogen-modules:
