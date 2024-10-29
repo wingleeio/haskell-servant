@@ -30,6 +30,7 @@ import qualified Data.OpenApi as OA
 import Data.Function
 import Control.Lens
 import Data.OpenApi (ToSchema(declareNamedSchema))
+import Network.Wai.Logger (withStdoutLogger)
 
 type API =
   Header "Cookie" Text :> Get '[HTML] H.Html
@@ -41,9 +42,11 @@ type API =
 
 startApp :: IO ()
 startApp = do
-  env <- lookupEnv "ENV"
-  let state = AppState.State { AppState.isDevelopment = env == Just "development" }
-  run 8080 (app state)
+  withStdoutLogger $ \logger -> do
+    env <- lookupEnv "ENV"
+    let state = AppState.State { AppState.isDevelopment = env == Just "development" }
+    let settings = setPort 8080 $ setLogger logger defaultSettings
+    runSettings settings (app state)
 
 app :: AppState.State -> Application
 app state = serve api (hoistServer api (AppState.nt state) server)

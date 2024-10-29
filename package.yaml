@@ -37,6 +37,7 @@ dependencies:
   - websockets
   - fsnotify
   - lens
+  - wai-logger
 
 ghc-options:
   - -Wall
