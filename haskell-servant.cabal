@@ -26,6 +26,7 @@ library
       Development
       Lib
       Lib.Attributes
+      Lib.Inertia
       Lib.State
       Lib.Templates
       Lib.Utils

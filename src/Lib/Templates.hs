@@ -4,17 +4,21 @@
 module Lib.Templates
   ( counter,
     count,
-    scalar
+    scalar,
+    inertiaBaseTemplate,
   )
 where
 
+import Control.Monad (when)
+import Control.Monad.Trans.Reader (asks)
+import Data.Aeson (ToJSON, encode)
+import Data.Text.Lazy (toStrict)
+import Data.Text.Lazy.Encoding (decodeUtf8)
 import qualified Lib.Attributes as Hx
+import qualified Lib.State as AppState
 import Text.Blaze.Html5 ((!))
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-import qualified Lib.State as AppState
-import Control.Monad.Trans.Reader (asks)
-import Control.Monad (when)
 
 meta :: AppState.AppM H.Html
 meta = do
@@ -23,6 +27,7 @@ meta = do
     H.head $ do
       H.title "Hello World"
       H.link ! A.rel "stylesheet" ! A.href "/styles.css"
+      H.meta ! A.name "viewport" ! A.content "width=device-width, initial-scale=1"
       when isDev $ H.script ! A.src "http://localhost:8080/development.js" $ ""
       H.script
         ! A.src "https://unpkg.com/htmx.org@2.0.3"
@@ -31,7 +36,7 @@ meta = do
         $ ""
 
 counter :: Integer -> AppState.AppM H.Html
-counter n = do 
+counter n = do
   metaHtml <- meta
   pure $ H.docTypeHtml $ do
     metaHtml
@@ -54,7 +59,7 @@ counter n = do
           ! Hx.swap "outerHTML"
           ! A.class_ "inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline"
           $ "+"
-      
+
 scalar :: AppState.AppM H.Html
 scalar = do
   metaHtml <- meta
@@ -66,3 +71,13 @@ scalar = do
 
 count :: Integer -> H.Html
 count n = H.span ! A.id "count" $ H.toHtml (show n)
+
+inertiaBaseTemplate :: (ToJSON a) => a -> H.Html
+inertiaBaseTemplate a = do
+  let pageData = H.toValue . toStrict . decodeUtf8 . encode $ a
+  H.docTypeHtml $ do
+    H.head $ do
+      H.link ! A.rel "stylesheet" ! A.href "/styles.css"
+      H.meta ! A.name "viewport" ! A.content "width=device-width, initial-scale=1"
+    H.body $ do
+      H.div ! A.id "app" ! H.customAttribute "data-page" pageData $ ""

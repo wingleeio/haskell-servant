@@ -1,14 +1,17 @@
-module Lib.State (
-    State(..),
+module Lib.State
+  ( State (..),
     AppM,
-    nt
-)where
+    nt,
+  )
+where
 
 import Control.Monad.Trans.Reader (ReaderT, runReaderT)
+import Network.Wai (Request)
 import Servant (Handler)
 
-newtype State = State 
-  { isDevelopment :: Bool
+data State = State
+  { isDevelopment :: Bool,
+    request :: Request
   }
 
 type AppM = ReaderT State Handler
