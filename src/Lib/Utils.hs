@@ -1,7 +1,7 @@
-module Lib.Utils (parseCount, makeCookie)where
+module Lib.Utils (parseCount, makeCookie) where
 
 import qualified Data.ByteString as BS
-import Data.Text ( pack, unpack, Text )
+import Data.Text (Text, pack, unpack)
 import qualified Data.Text.Encoding as TE
 import Data.Text.Read (decimal, signed)
 

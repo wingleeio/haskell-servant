@@ -4,17 +4,17 @@
 module Lib.Templates
   ( counter,
     count,
-    scalar
+    scalar,
   )
 where
 
+import Control.Monad (when)
+import Control.Monad.Trans.Reader (asks)
 import qualified Lib.Attributes as Hx
+import qualified Lib.State as AppState
 import Text.Blaze.Html5 ((!))
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-import qualified Lib.State as AppState
-import Control.Monad.Trans.Reader (asks)
-import Control.Monad (when)
 
 meta :: AppState.AppM H.Html
 meta = do
@@ -31,7 +31,7 @@ meta = do
         $ ""
 
 counter :: Integer -> AppState.AppM H.Html
-counter n = do 
+counter n = do
   metaHtml <- meta
   pure $ H.docTypeHtml $ do
     metaHtml
@@ -54,7 +54,7 @@ counter n = do
           ! Hx.swap "outerHTML"
           ! A.class_ "inline-flex items-center justify-center px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 bg-white border rounded-md text-neutral-500 hover:text-neutral-700 border-neutral-200/70 hover:bg-neutral-100 active:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-200/60 focus:shadow-outline"
           $ "+"
-      
+
 scalar :: AppState.AppM H.Html
 scalar = do
   metaHtml <- meta
