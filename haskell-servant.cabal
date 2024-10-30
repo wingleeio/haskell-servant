@@ -44,7 +44,9 @@ library
     , blaze-markup
     , bytestring
     , cookie
+    , directory
     , fsnotify
+    , http-media
     , lens
     , openapi3
     , servant-blaze
@@ -75,8 +77,10 @@ executable haskell-servant-exe
     , blaze-markup
     , bytestring
     , cookie
+    , directory
     , fsnotify
     , haskell-servant
+    , http-media
     , lens
     , openapi3
     , servant-blaze
@@ -108,11 +112,13 @@ test-suite haskell-servant-test
     , blaze-markup
     , bytestring
     , cookie
+    , directory
     , fsnotify
     , haskell-servant
     , hspec
     , hspec-wai
     , hspec-wai-json
+    , http-media
     , lens
     , openapi3
     , servant-blaze

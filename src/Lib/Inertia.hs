@@ -2,9 +2,10 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib.Inertia (response, Response) where
+module Lib.Inertia (response, Response, initInertia) where
 
 import Control.Lens ((?~))
 import Control.Monad.Trans.Reader (asks)
@@ -17,8 +18,9 @@ import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
 import GHC.Generics (Generic)
 import qualified Lib.State as AppState
-import Lib.Templates (inertiaBaseTemplate)
+import Lib.Templates (inertiaBaseTemplate, viteScript)
 import Network.Wai (rawPathInfo)
+import System.Directory (doesFileExist)
 import Text.Blaze (ToMarkup)
 import qualified Text.Blaze.Html5 as H
 
@@ -47,18 +49,34 @@ instance OA.ToSchema Response where
 response :: (ToJSON a) => Maybe Text -> Maybe Text -> Text -> a -> AppState.AppM Response
 response header maybeVersion componentName serverProps = do
   req <- asks AppState.request
+  template <- asks AppState.template
+
   let path = TE.decodeUtf8 $ rawPathInfo req
 
   let page =
         object
-          [ "component" .= componentName,
-            "props" .= serverProps,
-            "url" .= path,
-            "version" .= fromMaybe "0" maybeVersion
+          [ "component" .= componentName
+          , "props" .= serverProps
+          , "url" .= path
+          , "version" .= fromMaybe "0" maybeVersion
           ]
 
   case header of
     Just _ -> pure $ JsonResponse page
-    _ -> do
-      let html = inertiaBaseTemplate page
-      pure $ HtmlResponse html
+    _ -> pure $ HtmlResponse $ template page
+
+initInertia :: IO (Value -> H.Html)
+initInertia = do
+  let viteHotFile = "./public/hot"
+
+  viteDevelopmentServerIsRunning <- doesFileExist viteHotFile
+
+  if viteDevelopmentServerIsRunning
+    then do
+      content <- readFile viteHotFile
+      let script = viteScript $ content ++ "/resources/js/app.jsx"
+      pure $ inertiaBaseTemplate script
+    else do
+      let viteManifestFile = "./public/build/.vite/manifest.json"
+      _ <- readFile viteManifestFile
+      pure $ error "Vite manifest file not found"

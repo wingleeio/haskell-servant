@@ -1,12 +1,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib.Attributes
-  ( get,
-    post,
-    target,
-    swap,
-  )
+module Lib.Attributes (
+  get,
+  post,
+  target,
+  swap,
+)
 where
 
 import Text.Blaze.Html5 as H

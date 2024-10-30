@@ -1,10 +1,13 @@
 {
   "name": "haskell-servant",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build && vite build --config ssr.config.js",
+    "build-watch": "vite build --watch && vite build --config ssr.config.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +19,10 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "laravel-vite-plugin": "^1.0.5",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
     "vite": "^5.4.10"
   }
 }

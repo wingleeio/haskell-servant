@@ -38,6 +38,8 @@ dependencies:
   - fsnotify
   - lens
   - wai-logger
+  - directory
+  - http-media
 
 ghc-options:
   - -Wall

@@ -5,11 +5,11 @@
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Lib
-  ( startApp,
-    app,
-    startDevelopmentServer,
-  )
+module Lib (
+  startApp,
+  app,
+  startDevelopmentServer,
+)
 where
 
 import Control.Lens
@@ -20,6 +20,7 @@ import Data.Text (Text)
 import qualified Data.Text.Encoding as TE
 import Development (startDevelopmentServer)
 import GHC.Generics
+import Lib.Inertia (initInertia)
 import qualified Lib.Inertia as Inertia
 import qualified Lib.State as AppState
 import qualified Lib.Templates as Templates
@@ -47,12 +48,13 @@ startApp :: IO ()
 startApp = do
   withStdoutLogger $ \logger -> do
     env <- lookupEnv "ENV"
-    let state = AppState.State {AppState.isDevelopment = env == Just "development", AppState.request = error "Not available"}
+    template <- initInertia
+    let state = AppState.State{AppState.isDevelopment = env == Just "development", AppState.request = error "Not available", AppState.template = template}
     let settings = setPort 8080 $ setLogger logger defaultSettings
     runSettings settings (app state)
 
 app :: AppState.State -> Application
-app base req = serve api (hoistServer api (AppState.nt (base {AppState.request = req})) server) req
+app base req = serve api (hoistServer api (AppState.nt (base{AppState.request = req})) server) req
 
 api :: Proxy API
 api = Proxy
@@ -63,16 +65,16 @@ server =
     :<|> increment
     :<|> decrement
     :<|> inertiaPageExample
-    :<|> Templates.scalar
+    :<|> pure Templates.scalar
     :<|> pure swagger
     :<|> serveDirectoryWebApp "public"
 
 home :: Maybe Text -> AppState.AppM H.Html
-home Nothing = Templates.counter 0
+home Nothing = pure $ Templates.counter 0
 home (Just maybeCookies) = do
   let cookies = parseCookies (TE.encodeUtf8 maybeCookies)
   let n = Utils.parseCount (lookup "haskell.count" cookies)
-  Templates.counter n
+  pure $ Templates.counter n
 
 increment :: Maybe Text -> AppState.AppM (Headers '[Header "Set-Cookie" Text] H.Html)
 increment Nothing = pure $ addHeader "haskell.count=1; Path=/" (Templates.count 1)
@@ -98,20 +100,6 @@ swagger =
     & OA.info . OA.description ?~ "This is an API built with Haskell Servent and HTMX"
     & OA.info . OA.license ?~ ("MIT" & OA.url ?~ OA.URL "https://haskell-htmx.uwulabs.io")
 
-data Test = Test
-  { test :: Text,
-    test2 :: Text
-  }
-  deriving (Generic)
-
-instance ToJSON Test
-
-inertiaPageExample :: Maybe Text -> Maybe Text -> AppState.AppM Inertia.Response
-inertiaPageExample maybeHeader maybeVersion = do
-  let inertia = Inertia.response maybeHeader maybeVersion
-
-  inertia "View/Counter" Test {test = "Hello", test2 = "World"}
-
 instance OA.ToSchema H.Html where
   declareNamedSchema _ =
     pure $
@@ -128,3 +116,14 @@ instance OA.ToSchema OA.OpenApi where
         mempty
           & OA.type_ ?~ OA.OpenApiObject
           & OA.description ?~ "OpenAPI specification"
+
+data Test = Test
+  { test :: Text
+  , test2 :: Text
+  }
+  deriving (Generic)
+
+instance ToJSON Test
+
+inertiaPageExample :: Maybe Text -> Maybe Text -> AppState.AppM Inertia.Response
+inertiaPageExample a b = Inertia.response a b "Home/Index" Test{test = "Hello", test2 = "World"}
