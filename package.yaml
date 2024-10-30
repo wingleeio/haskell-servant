@@ -38,6 +38,7 @@ dependencies:
   - fsnotify
   - lens
   - wai-logger
+  - wai-cors
 
 ghc-options:
   - -Wall

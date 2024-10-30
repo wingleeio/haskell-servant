@@ -19,17 +19,17 @@ type API = "ws" :> WebSocket
 
 wsApp :: WS.Connection -> Handler ()
 wsApp conn = liftIO $ do
-  let srcDir = "src"
+    let srcDir = "src"
 
-  _ <- withManager $ \mgr -> do
-    _ <- watchTree mgr srcDir (const True) $ \event -> do
-      putStrLn $ "File changed: " ++ show event
-      WS.sendTextData conn ("reload" :: Text)
+    _ <- withManager $ \mgr -> do
+        _ <- watchTree mgr srcDir (const True) $ \event -> do
+            putStrLn $ "File changed: " ++ show event
+            WS.sendTextData conn ("reload" :: Text)
 
-    forever $ threadDelay 1000000
+        forever $ threadDelay 1000000
 
-  _ <- WS.receive conn
-  pure ()
+    _ <- WS.receive conn
+    pure ()
 
 server :: Server API
 server = wsApp
@@ -39,5 +39,5 @@ app = serve (Proxy :: Proxy API) server
 
 startDevelopmentServer :: IO ()
 startDevelopmentServer = do
-  putStrLn "WebSocket server starting on port 10000..."
-  run 10000 app
+    putStrLn "WebSocket server starting on port 10000..."
+    run 10000 app

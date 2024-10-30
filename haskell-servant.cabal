@@ -29,6 +29,7 @@ library
       Lib.State
       Lib.Templates
       Lib.Utils
+      Pages.Counter
   other-modules:
       Paths_haskell_servant
   autogen-modules:
@@ -53,6 +54,7 @@ library
     , text
     , transformers
     , wai
+    , wai-cors
     , wai-logger
     , warp
     , websockets
@@ -85,6 +87,7 @@ executable haskell-servant-exe
     , text
     , transformers
     , wai
+    , wai-cors
     , wai-logger
     , warp
     , websockets
@@ -121,6 +124,7 @@ test-suite haskell-servant-test
     , text
     , transformers
     , wai
+    , wai-cors
     , wai-logger
     , warp
     , websockets
