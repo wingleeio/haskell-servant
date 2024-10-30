@@ -63,8 +63,8 @@ server =
 
 home :: Maybe Text -> AppState.AppM H.Html
 home Nothing = Templates.counter 0
-home (Just x) = do
-  let cookies = parseCookies (TE.encodeUtf8 x)
+home (Just maybeCookies) = do
+  let cookies = parseCookies (TE.encodeUtf8 maybeCookies)
   let n = Utils.parseCount (lookup "haskell.count" cookies)
   Templates.counter n
 
